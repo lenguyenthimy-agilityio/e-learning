@@ -1,0 +1,21 @@
+{
+  // Formatter settings
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "editor.formatOnSave": true,
+
+  // Black formatter arguments
+  "black-formatter.args": ["--line-length", "119"],
+
+  // Ruff linter config
+  "python.linting.enabled": true,
+  "python.linting.ruffEnabled": true,
+
+  // Visual line length ruler
+  "editor.rulers": [119],
+
+  // Optional: wrapping settings
+  "editor.wordWrap": "off",
+  "editor.wordWrapColumn": 119
+}
