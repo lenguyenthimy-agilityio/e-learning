@@ -33,8 +33,11 @@ line-length = 119
 [tool.black]
 line-length = 119
 
+[tool.flake8]
+max-line-length = 119
+
 [tool.ruff.format]
-line-length = 119
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "D"]  # "I" enables import sorting
+ignore = ["D203", "D209", "D210", "D212", "D213", "D200", "D413", "D104", "D401"]  # Ignore docstring formatting rules

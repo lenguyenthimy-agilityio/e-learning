@@ -1,9 +1,8 @@
 """
-Database setting
+Database setting.
 """
 
 from decouple import config
-
 
 DATABASE_HOST: str = config("DATABASE_HOST", default="localhost")
 DATABASE_NAME: str = config("DATABASE_NAME")

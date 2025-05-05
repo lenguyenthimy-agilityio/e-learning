@@ -1,7 +1,6 @@
 from decouple import config
 from split_settings.tools import include
 
-
 available_environments = ("local", "test", "dev", "stag", "prod")
 
 # Managing environment via DJANGO_ENV variable:

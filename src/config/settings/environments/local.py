@@ -1,5 +1,5 @@
 """
-Local settings
+Local settings.
 """
 
 from config.settings.components.common import INSTALLED_APPS, MIDDLEWARE
