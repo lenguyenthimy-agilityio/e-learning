@@ -10,5 +10,6 @@ print(f"Using environment: {environment}")
 include(
     "components/common.py",
     "components/database.py",
+    "components/logging.py",
     *(f"environments/{environment}.py",) if environment in available_environments else (),
 )
