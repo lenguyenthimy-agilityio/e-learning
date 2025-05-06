@@ -2,6 +2,7 @@
 Base API ViewSet.
 """
 
+from django.conf import settings
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
@@ -49,3 +50,12 @@ class BaseAPIViewSet(viewsets.GenericViewSet):
         Return default response deleted. Status code is 204.
         """
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_resource_uri(self):
+        """
+        Get resource URI for the viewset.
+        """
+        domain = settings.DOMAIN
+        api_root = "/api/v1/"
+
+        return f"{domain}{api_root}{self.resource_name}/"

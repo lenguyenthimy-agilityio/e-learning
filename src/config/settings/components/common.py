@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 
+from decouple import config
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -34,7 +36,15 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_spectacular",
 ]
+
+
+API_APPS = [
+    "users",
+]
+
+INSTALLED_APPS += API_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -65,7 +75,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+DJANGO_ENV: str = config("DJANGO_ENV", default="dev")
+IS_PROD: bool = DJANGO_ENV == "prod"
+DOMAIN: str = config("DOMAIN", default="http://localhost:8000")
 
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "E learning API",
+    "DESCRIPTION": "API for E learning",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "GENERATION": {"operation_id_generator_class": "drf_spectacular.generators.OperationIdGenerator"},
+}
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
