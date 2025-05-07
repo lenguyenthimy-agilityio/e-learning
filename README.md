@@ -2,8 +2,6 @@
 
 This project is designed to **enhance backend development skills** by building a production-grade API system for an e-learning platform. It emphasizes best practices in Django, DRF, testing, linting, and modern Python tooling.
 
----
-
 ## Prerequisites
 
 Make sure you have the following tools installed:
@@ -11,8 +9,6 @@ Make sure you have the following tools installed:
 -   [**uv**](https://docs.astral.sh/uv) – Fast Python package manager and environment manager
 -   [**pre-commit**](https://pre-commit.com/) – Framework for managing Git hooks
 -   [**ruff**](https://docs.astral.sh/ruff/) – Ultra-fast Python linter and formatter
-
----
 
 ## Stack & Versioning
 
@@ -30,13 +26,11 @@ Make sure you have the following tools installed:
 -   [pytest-django](https://pytest-django.readthedocs.io/en/latest/)
 -   [factory-boy](https://factoryboy.readthedocs.io/en/stable/) – Test data factories
 
----
-
 ## Development Setup
 
 ### Using `uv`
 
-1. **Install `uv`** (macOS/Linux):
+1. Install `uv` (macOS/Linux):
 
     ```bash
     curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -68,10 +62,22 @@ Make sure you have the following tools installed:
     pre-commit install
     ```
 
-7. Start the server
+7. Run migrate
+
+    ```bash
+    bin/dj-migrate.sh
+    ```
+
+8. Start the server
 
     ```bash
     bin/dj-run.sh
+    ```
+
+9. To run all tests:
+
+    ```
+    bin/dj-test.sh
     ```
 
 ### Run with Docker compose
