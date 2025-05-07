@@ -690,7 +690,6 @@ class BaseAPITestCase(APITestCase):
             headers["HTTP_AUTHORIZATION"] = f"Bearer {invalid_token}"
         else:
             headers["HTTP_AUTHORIZATION"] = None
-            headers["HTTP_X_APP_CLIENT_ID"] = self.app_client_id
 
         self.api_client.credentials(**headers)
 
