@@ -10,7 +10,7 @@ from rest_framework.response import Response
 
 from core.apis import BaseAPIViewSet
 from core.schema import base_responses
-from users.serializers.serializer import UserSerializer
+from users.serializers import UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet, BaseAPIViewSet):
