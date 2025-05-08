@@ -13,7 +13,7 @@ urlpatterns = []
 api_routers = DefaultRouter()
 
 for api_app in getattr(settings, "API_APPS", []):
-    api_module = import_module(f"{api_app}.apis.views", "apps")
+    api_module = import_module(f"{api_app}.apis", "apps")
 
     for viewset in api_module.apps:
         api_routers.register(viewset.resource_name, viewset, viewset.resource_name)
