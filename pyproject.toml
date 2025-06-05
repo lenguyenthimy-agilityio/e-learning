@@ -14,6 +14,7 @@ dependencies = [
     "djangorestframework>=3.16.0",
     "djangorestframework-simplejwt>=5.5.0",
     "drf-spectacular>=0.28.0",
+    "pillow>=11.2.1",
     "psycopg[binary]>=3.2.6",
     "python-decouple>=3.8",
     "requests>=2.32.3",
@@ -31,6 +32,14 @@ dev = [
 
 [tool.ruff]
 line-length = 119
+
+exclude = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    "migrations",
+    "settings.py",
+]
 
 [tool.black]
 line-length = 119

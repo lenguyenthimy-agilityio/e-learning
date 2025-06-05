@@ -3,7 +3,7 @@ Test users views.
 """
 
 from core.tests import BaseAPITestCase
-from users.apis.views import UserViewSet
+from users.apis import UserViewSet
 
 
 class UsersAPITestCase(BaseAPITestCase):

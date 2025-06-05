@@ -1,28 +1,28 @@
-version: '3.9'
+version: "3.9"
 services:
-    api:
-        image: e-learning:local
-        build: .
-        command: bin/dj-run.sh
-        environment:
-            DJANGO_ENV: local
-            DATABASE_HOST: db
-            DATABASE_NAME: e-learning
-            DATABASE_USER: postgres
-            DATABASE_PASSWORD: postgres
-            DATABASE_ENGINE: django.db.backends.postgresql
-            PORT: 8000
-            CELERY_BROKER_URL: redis://redis:6379/0
-            CELERY_BROKER_TRANSPORT: redis
-        depends_on:
-            - db
-            - redis
-        ports:
-            - 8000:8000
-        volumes:
-            - .:/home/app
-        networks:
-            - e_learning_network
+    # api:
+    #     image: e-learning:local
+    #     build: .
+    #     command: bin/dj-run.sh
+    #     environment:
+    #         DJANGO_ENV: local
+    #         DATABASE_HOST: db
+    #         DATABASE_NAME: e-learning
+    #         DATABASE_USER: postgres
+    #         DATABASE_PASSWORD: postgres
+    #         DATABASE_ENGINE: django.db.backends.postgresql
+    #         PORT: 8000
+    #         CELERY_BROKER_URL: redis://redis:6379/0
+    #         CELERY_BROKER_TRANSPORT: redis
+    #     depends_on:
+    #         - db
+    #         - redis
+    #     ports:
+    #         - 8000:8000
+    #     volumes:
+    #         - .:/home/app
+    #     networks:
+    #         - e_learning_network
     db:
         image: postgres:14.2-alpine
         environment:
@@ -45,4 +45,4 @@ services:
             - e_learning_network
 
 networks:
-  e_learning_network:
+    e_learning_network:

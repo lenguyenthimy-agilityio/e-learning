@@ -2,7 +2,6 @@
 Users Views.
 """
 
-from django.contrib.auth.models import User
 from drf_spectacular.utils import extend_schema
 from rest_framework import viewsets
 from rest_framework.request import Request
@@ -10,6 +9,7 @@ from rest_framework.response import Response
 
 from core.apis import BaseAPIViewSet
 from core.schema import base_responses
+from users.models import User
 from users.serializers import UserSerializer
 
 
@@ -19,7 +19,7 @@ class UserViewSet(viewsets.ModelViewSet, BaseAPIViewSet):
     """
 
     resource_name = "users"
-    queryset = User.objects.all().order_by("-date_joined")
+    queryset = User.objects.all().order_by("-created_at")
     serializer_class = UserSerializer
     permission_classes = []
 
