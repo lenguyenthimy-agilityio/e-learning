@@ -2,14 +2,38 @@
 User model.
 """
 
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 
 from core.constants import UserRole
 from core.models import AbstractTimeStampedModel, AbstractUUIDModel
 
 
-class User(PermissionsMixin, AbstractBaseUser, AbstractUUIDModel, AbstractTimeStampedModel):
+class UserManager(BaseUserManager):
+    """
+    User manager for creating and managing user accounts.
+
+    This manager provides methods to create users
+    """
+
+    def create_user(self, email, password=None, **extra_fields):
+        """
+        Create and return a user with an email and password.
+
+        Args:
+            email (Email): Email address of the user.
+            password (string): Password for the user.
+            extra_fields (dict): Additional fields for the user.
+
+        """
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+
+class User(AbstractBaseUser, AbstractUUIDModel, AbstractTimeStampedModel):
     """
     User model.
     """
@@ -25,9 +49,14 @@ class User(PermissionsMixin, AbstractBaseUser, AbstractUUIDModel, AbstractTimeSt
         verbose_name="role",
     )
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
+
+    objects = UserManager()
 
     class Meta:
         """
@@ -41,4 +70,4 @@ class User(PermissionsMixin, AbstractBaseUser, AbstractUUIDModel, AbstractTimeSt
         """
         String representation of the User model.
         """
-        return f"{self.username} ({self.role})"
+        return f"{self.email} ({self.role})"
