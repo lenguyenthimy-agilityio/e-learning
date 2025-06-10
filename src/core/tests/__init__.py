@@ -14,12 +14,11 @@ rights of the Software.
 import logging
 import uuid
 
-import jwt
-from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from requests import Response
 from rest_framework.test import APIClient, APITestCase
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.factories import UserFactory
 
@@ -79,16 +78,16 @@ class BaseAPITestCase(APITestCase):
         Clean up the test environment for a test case after a test run.
         """
 
-    def set_authentication(self, user: User):
-        """
-        Log in the user using the test client.
-        """
-        self.authenticated_user = user
+    # def set_authentication(self, user: User):
+    #     """
+    #     Log in the user using the test client.
+    #     """
+    #     self.authenticated_user = user
 
-        self.jwt_payload = {
-            "email": user.email,
-            "password": user.password,
-        }
+    #     self.jwt_payload = {
+    #         "email": user.email,
+    #         "password": user.password,
+    #     }
 
     def make_user(
         self,
@@ -206,18 +205,18 @@ class BaseAPITestCase(APITestCase):
     # GET JSON
     # ---------------------------------------#
 
-    def get_credentials(self) -> str:
+    def get_credentials(self, user=None) -> str:
         """
         Create a token.
         """
-        self.assertIsNotNone(
-            self.jwt_payload,
-            "Expected an JSON object. You should set authentication first",
-        )
+        self.authenticated_user = user
 
-        token = jwt.encode(self.jwt_payload, "secret", algorithm=settings.JWT_SIGNING_ALGORITHM)
+        if not user:
+            self.authenticated_user = self.make_user()
+        refresh = RefreshToken.for_user(self.authenticated_user)
+        access_token = str(refresh.access_token)
 
-        return f"Bearer {token}"
+        return f"Bearer {access_token}"
 
     def build_api_url(self, fragment: str = None) -> str:
         """

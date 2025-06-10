@@ -3,7 +3,9 @@ Serializers for the User model.
 """
 
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from core.serializers import BaseSerializer
 from users.models import User
 
 
@@ -32,7 +34,7 @@ class SignupSerializer(serializers.ModelSerializer):
         """
 
         model = User
-        fields = ("email", "password", "role", "first_name", "last_name", "username")
+        fields = ("email", "password", "role", "first_name", "last_name")
         extra_kwargs = {"password": {"write_only": True}}
 
     def validate_email(self, value):
@@ -71,16 +73,34 @@ class SignupSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 
-class LoginSerializer(serializers.Serializer):
+class CustomTokenObtainPairSerializer(BaseSerializer, TokenObtainPairSerializer):
+    """
+    Custom serializer for obtaining JWT tokens.
+    """
+
+    def validate(self, attrs):
+        """
+        Validate the input attributes for login.
+        """
+        try:
+            return super().validate(attrs)
+        except serializers.ValidationError as e:
+            raise e  # forward validation errors
+        except Exception:
+            # Convert AuthenticationFailed (401) into ValidationError (400)
+            raise serializers.ValidationError({"message": "Invalid email or password"})
+
+
+class LoginSerializer(BaseSerializer):
     """
     Login serializer for user authentication.
     """
 
-    username = serializers.EmailField()
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
 
-class LogoutRequestSerializer(serializers.Serializer):
+class LogoutRequestSerializer(BaseSerializer):
     """
     Serializer for logout request.
     """

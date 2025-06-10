@@ -8,13 +8,19 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from core.apis import BaseAPIViewSet
+from core.exception import TokenException
 from core.schema import base_responses
 from users.models import User
-from users.serializers import LoginSerializer, LogoutRequestSerializer, SignupSerializer, UserSerializer
+from users.serializers import (
+    CustomTokenObtainPairSerializer,
+    LoginSerializer,
+    LogoutRequestSerializer,
+    SignupSerializer,
+    UserSerializer,
+)
 
 
 class UserViewSet(viewsets.ModelViewSet, BaseAPIViewSet):
@@ -49,7 +55,7 @@ class AuthenticationViewSet(viewsets.ViewSet, BaseAPIViewSet):
 
     @extend_schema(
         request=SignupSerializer,
-        responses={201: UserSerializer},
+        responses={**base_responses, 201: UserSerializer},
     )
     @action(detail=False, methods=["post"], permission_classes=[AllowAny])
     def signup(self, request: Request, *args, **kwargs) -> Response:
@@ -63,21 +69,18 @@ class AuthenticationViewSet(viewsets.ViewSet, BaseAPIViewSet):
 
     @extend_schema(
         request=LoginSerializer,
-        responses={200: TokenObtainPairSerializer},
+        responses={**base_responses, 200: CustomTokenObtainPairSerializer},
     )
-    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
-    def login(self, request: Request, *args, **kwargs) -> Response:
+    @action(detail=False, methods=["post"], url_path="signin", permission_classes=[AllowAny])
+    def signin(self, request: Request, *args, **kwargs) -> Response:
         """
         Login a user and return access and refresh tokens.
         """
-        serializer = TokenObtainPairSerializer(data=request.data)
+        serializer = CustomTokenObtainPairSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return self.response_ok(data=serializer.validated_data)
 
-    @extend_schema(
-        request=LogoutRequestSerializer,
-        responses={204: None},
-    )
+    @extend_schema(request=LogoutRequestSerializer, responses={**base_responses, 204: None})
     @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
     def logout(self, request: Request, *args, **kwargs) -> Response:
         """
@@ -88,9 +91,8 @@ class AuthenticationViewSet(viewsets.ViewSet, BaseAPIViewSet):
             token = RefreshToken(refresh_token)
             token.blacklist()
             return self.response_deleted()
-
-        except Exception:
-            return Response({"error": "Invalid refresh token"})
+        except Exception as exc:
+            raise TokenException(code="INVALID", developer_message=str(exc)) from exc
 
 
 apps = [UserViewSet, AuthenticationViewSet]

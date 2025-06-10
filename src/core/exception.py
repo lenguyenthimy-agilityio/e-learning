@@ -28,6 +28,14 @@ class SystemErrorMessage(BaseErrorMessage):
     SYSTEM_MAINTENANCE = "System maintenance."
 
 
+class TokenErrorMessage(BaseErrorMessage):
+    """
+    Token error message class.
+    """
+
+    INVALID = "Token is invalid."
+
+
 class BaseCustomException(Exception):
     """
     The base custom exception class.
@@ -98,3 +106,13 @@ class SystemException(BaseCustomException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_dev_msg = "Something went wrong. Please try again later."
     default_user_message = "Something went wrong. Please try again later."
+
+
+class TokenException(BaseCustomException):
+    """
+    System exception.
+    """
+
+    app_name = "TOKEN"
+    error = TokenErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
