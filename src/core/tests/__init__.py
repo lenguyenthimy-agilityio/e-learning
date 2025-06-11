@@ -15,12 +15,13 @@ import logging
 import uuid
 
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import User
 from requests import Response
 from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from core.constants import UserRole
 from users.factories import UserFactory
+from users.models import User
 
 logger = logging.getLogger("test")
 
@@ -78,23 +79,13 @@ class BaseAPITestCase(APITestCase):
         Clean up the test environment for a test case after a test run.
         """
 
-    # def set_authentication(self, user: User):
-    #     """
-    #     Log in the user using the test client.
-    #     """
-    #     self.authenticated_user = user
-
-    #     self.jwt_payload = {
-    #         "email": user.email,
-    #         "password": user.password,
-    #     }
-
     def make_user(
         self,
         username="user",
         first_name=None,
         last_name=None,
         email=None,
+        role=UserRole.STUDENT.value,
         password="123456",
         is_staff=False,
         is_superuser=False,
@@ -109,6 +100,7 @@ class BaseAPITestCase(APITestCase):
             first_name=first_name or username,
             last_name=last_name or username,
             email=email or f"{username}@domain.com",
+            role=role,
             is_staff=is_staff,
             is_superuser=is_superuser,
             password=make_password(password),
@@ -116,105 +108,32 @@ class BaseAPITestCase(APITestCase):
 
         return user
 
-    def assertHttpOk(self, resp):
+    def set_authenticate(self, user=None):
         """
-        Test the response status code is 200.
-        """
-        self.assertEqual(resp.status_code, 200)
-
-    def assertHttpCreated(self, resp):
-        """
-        Test the response status code is 201.
-        """
-        self.assertEqual(resp.status_code, 201)
-
-    def assertHttpNoContent(self, resp):
-        """
-        Test the response status code is 204.
-        """
-        self.assertEqual(resp.status_code, 204)
-
-    def assertHttpBadRequest(self, resp):
-        """
-        Test the response status code is 400.
-        """
-        self.assertEqual(resp.status_code, 400)
-
-    def assertHttpUnauthorized(self, resp):
-        """
-        Test the response status code is 401.
-        """
-        self.assertEqual(resp.status_code, 401)
-
-    def assertHttpForbidden(self, resp):
-        """
-        Test the response status code is 403.
-        """
-        self.assertEqual(resp.status_code, 403)
-
-    def assertHttpTooManyRequests(self, resp):
-        """
-        Test the response status code is 429.
-        """
-        self.assertEqual(resp.status_code, 429)
-
-    def assertHttpNotFound(self, resp):
-        """
-        Test the response status code is 404.
-        """
-        self.assertEqual(resp.status_code, 404)
-
-    def assertHttpNotAllowed(self, resp):
-        """
-        Test the response status code is 405.
-        """
-        self.assertEqual(resp.status_code, 405)
-
-    def assertHasCustomErrorMessages(self, response: Response) -> None:
-        """
-        Test custom error to make sure the error response has right data format.
-
-        The right data format should be:
-        {
-            "errors": {
-                "developer_message": "The developer message",
-                "message": "The message",
-                "code": "The_code"
-            }
-        }
-        """
-        error_data = response.data.get("errors", {})
-        required_fields = ["developer_message", "message", "code"]
-
-        for field in required_fields:
-            self.assertTrue(field in error_data.keys())
-
-    def assertDataSuccess(self, data: dict):
-        """
-        Check the data has the success object.
-
-        The right data format should be:
-        {
-            "data": {
-                "success": True
-            }
-        }
-        """
-        self.assertTrue(data.get("data", {}).get("success", ""))
-
-    # GET JSON
-    # ---------------------------------------#
-
-    def get_credentials(self, user=None) -> str:
-        """
-        Create a token.
+        Authenticate a user for the API client.
         """
         self.authenticated_user = user
-
         if not user:
             self.authenticated_user = self.make_user()
+
+        return self.authenticated_user
+
+    def get_tokens(self) -> str:
+        """
+        Get the JWT token for the authenticated user.
+        """
+        if not self.authenticated_user:
+            self.authenticated_user = self.set_authenticate()
+
         refresh = RefreshToken.for_user(self.authenticated_user)
         access_token = str(refresh.access_token)
+        return access_token, str(refresh)
+
+    def get_credentials(self) -> str:
+        """
+        Get the credentials for the authenticated user.
+        """
+        access_token, _ = self.get_tokens()
 
         return f"Bearer {access_token}"
 
@@ -892,3 +811,89 @@ class BaseAPITestCase(APITestCase):
         """
         resp = self.delete_json(fragment, data, **params)
         self.assertHttpNotFound(resp)
+
+    def assertHttpOk(self, resp):
+        """
+        Test the response status code is 200.
+        """
+        self.assertEqual(resp.status_code, 200)
+
+    def assertHttpCreated(self, resp):
+        """
+        Test the response status code is 201.
+        """
+        self.assertEqual(resp.status_code, 201)
+
+    def assertHttpNoContent(self, resp):
+        """
+        Test the response status code is 204.
+        """
+        self.assertEqual(resp.status_code, 204)
+
+    def assertHttpBadRequest(self, resp):
+        """
+        Test the response status code is 400.
+        """
+        self.assertEqual(resp.status_code, 400)
+
+    def assertHttpUnauthorized(self, resp):
+        """
+        Test the response status code is 401.
+        """
+        self.assertEqual(resp.status_code, 401)
+
+    def assertHttpForbidden(self, resp):
+        """
+        Test the response status code is 403.
+        """
+        self.assertEqual(resp.status_code, 403)
+
+    def assertHttpTooManyRequests(self, resp):
+        """
+        Test the response status code is 429.
+        """
+        self.assertEqual(resp.status_code, 429)
+
+    def assertHttpNotFound(self, resp):
+        """
+        Test the response status code is 404.
+        """
+        self.assertEqual(resp.status_code, 404)
+
+    def assertHttpNotAllowed(self, resp):
+        """
+        Test the response status code is 405.
+        """
+        self.assertEqual(resp.status_code, 405)
+
+    def assertHasCustomErrorMessages(self, response: Response) -> None:
+        """
+        Test custom error to make sure the error response has right data format.
+
+        The right data format should be:
+        {
+            "errors": {
+                "developer_message": "The developer message",
+                "message": "The message",
+                "code": "The_code"
+            }
+        }
+        """
+        error_data = response.data.get("errors", {})
+        required_fields = ["developer_message", "message", "code"]
+
+        for field in required_fields:
+            self.assertTrue(field in error_data.keys())
+
+    def assertDataSuccess(self, data: dict):
+        """
+        Check the data has the success object.
+
+        The right data format should be:
+        {
+            "data": {
+                "success": True
+            }
+        }
+        """
+        self.assertTrue(data.get("data", {}).get("success", ""))

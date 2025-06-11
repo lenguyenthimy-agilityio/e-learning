@@ -2,8 +2,6 @@
 Test cases for user authentication APIs.
 """
 
-from rest_framework_simplejwt.tokens import RefreshToken
-
 from core.tests import BaseAPITestCase
 from users.apis import AuthenticationViewSet
 from users.models import User
@@ -140,22 +138,32 @@ class LogoutAPITestCase(BaseAPITestCase):
         super().setUp()
         self.fragment = "logout"
 
-        self.user = User.objects.create_user(
-            email="logoutuser@example.com", username="logoutuser@example.com", password="Abcd@1234"
-        )
-
-        # Generate JWT tokens manually
-        self.refresh = RefreshToken.for_user(self.user)
-        self.access_token = str(self.refresh.access_token)
-        self.refresh_token = str(self.refresh)
-
     def test_logout_success(self):
         """
         Test that refresh token is blacklisted on logout.
         """
+        _, refresh_token = self.get_tokens()
         response = self.post_json_ok(
             fragment=self.fragment,
-            data={"refresh": self.refresh_token},
+            data={"refresh": refresh_token},
         )
 
         assert response.status_code == 204
+
+    def test_logout_invalid_token_bad_request(self):
+        """
+        Test logout with an invalid refresh token.
+        """
+        response = self.post_json_bad_request(
+            fragment=self.fragment,
+            data={"refresh": "invalid_token"},
+        )
+
+        assert response.status_code == 400
+
+    def test_logout_unauthenticated(self):
+        """
+        Test logout without authentication.
+        """
+        response = self.post_json_unauthorized(fragment=self.fragment, data={})
+        assert response.status_code == 401
