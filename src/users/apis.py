@@ -3,7 +3,6 @@ Users Views.
 """
 
 from drf_spectacular.utils import extend_schema
-from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
@@ -11,42 +10,64 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from core.apis import BaseAPIViewSet
-from core.exception import TokenException
+from core.exception import TokenException, UserException
 from core.schema import base_responses
-from users.models import User
 from users.serializers import (
     CustomTokenObtainPairSerializer,
     LoginSerializer,
     LogoutRequestSerializer,
     SignupSerializer,
     UserSerializer,
+    UserUpdateSerializer,
 )
 
 
-class UserViewSet(viewsets.ModelViewSet, BaseAPIViewSet):
+class UserViewSet(BaseAPIViewSet):
     """
     User viewset for handling user-related operations.
     """
 
     resource_name = "users"
-    queryset = User.objects.all().order_by("-created_at")
-    serializer_class = UserSerializer
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        responses={
-            **base_responses,
-            200: UserSerializer,
-        },
-    )
-    def list(self, request: Request, *args, **kwargs) -> Response:
+    def get_object(self):
         """
-        Get list of users in an application.
+        Get the authenticated user object.
         """
-        return super().list(request, *args, **kwargs)
+        if self.kwargs.get("pk") == "me":
+            return self.request.user
+
+        return super().get_object()
+
+    @extend_schema(responses={**base_responses, 200: UserSerializer})
+    def retrieve(self, request: Request, **kwargs) -> Response:
+        """
+        Retrieve the authenticated user's details.
+        """
+        user = self.get_object()
+        if not user:
+            raise UserException(code="NOT_FOUND")
+
+        serializer = UserSerializer(user)
+        return self.response_ok(data=serializer.data)
+
+    @extend_schema(request=UserUpdateSerializer, responses={**base_responses, 200: UserSerializer})
+    def partial_update(self, request: Request, **kwargs) -> Response:
+        """
+        Update the authenticated user's details.
+        """
+        user = self.get_object()
+        if not user:
+            raise UserException(code="NOT_FOUND")
+
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+
+        return self.response_ok(data=serializer.data)
 
 
-class AuthenticationViewSet(viewsets.ViewSet, BaseAPIViewSet):
+class AuthenticationViewSet(BaseAPIViewSet):
     """
     Authentication viewset for handling user authentication.
     """

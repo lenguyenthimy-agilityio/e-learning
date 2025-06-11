@@ -36,6 +36,14 @@ class TokenErrorMessage(BaseErrorMessage):
     INVALID = "Token is invalid."
 
 
+class UserErrorMessage(BaseErrorMessage):
+    """
+    Token error message class.
+    """
+
+    NOT_FOUND = "User not found."
+
+
 class BaseCustomException(Exception):
     """
     The base custom exception class.
@@ -115,4 +123,14 @@ class TokenException(BaseCustomException):
 
     app_name = "TOKEN"
     error = TokenErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
+class UserException(BaseCustomException):
+    """
+    System exception.
+    """
+
+    app_name = "USER"
+    error = UserErrorMessage
     status_code = status.HTTP_400_BAD_REQUEST

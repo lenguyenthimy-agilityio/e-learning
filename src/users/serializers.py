@@ -23,6 +23,23 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "email", "first_name", "last_name", "created_at"]
 
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    """
+    User update serializer.
+    """
+
+    class Meta:
+        """
+        Class Meta for UserUpdateSerializer.
+        """
+
+        model = User
+        fields = ["first_name", "last_name", "email"]
+        extra_kwargs = {
+            "email": {"required": False},
+        }
+
+
 class SignupSerializer(serializers.ModelSerializer):
     """
     Sign up serializer.
