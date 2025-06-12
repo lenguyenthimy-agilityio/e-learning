@@ -21,7 +21,7 @@
           "name": "Debug: Django Unit test",
           "type": "python",
           "request": "launch",
-          "program": "${file",
+          "program": "${file}",
           "purpose": ["debug-test"],
           "console": "integratedTerminal",
           "envFile": "${workspaceFolder}/.env",

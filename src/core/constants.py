@@ -30,3 +30,25 @@ class BaseChoiceEnum(Enum):
             List[int]: List of values.
         """
         return [data.value for data in cls]
+
+    @classmethod
+    def choices(cls) -> List[Tuple]:
+        """
+        Get choices of enum.
+
+        Returns:
+            List[Tuple]: List of choice.
+        """
+        return [(data.value, data.name) for data in cls]
+
+
+class UserRole(BaseChoiceEnum):
+    """
+    Role choices for the user model.
+    """
+
+    INSTRUCTOR = "Instructor"
+    STUDENT = "Student"
+
+
+MAX_FILE_SIZE = 2 * 1024 * 1024  # 2 MB

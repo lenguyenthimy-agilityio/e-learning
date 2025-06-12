@@ -5,9 +5,9 @@ Users factories.
 from uuid import uuid4
 
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import User
 
 from core import factories
+from users.models import User
 
 test_password = make_password("test_password")
 
