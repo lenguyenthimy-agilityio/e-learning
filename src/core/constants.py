@@ -49,3 +49,6 @@ class UserRole(BaseChoiceEnum):
 
     INSTRUCTOR = "Instructor"
     STUDENT = "Student"
+
+
+MAX_FILE_SIZE = 2 * 1024 * 1024  # 2 MB

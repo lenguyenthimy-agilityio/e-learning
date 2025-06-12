@@ -42,7 +42,9 @@ class BaseAPIViewSet(viewsets.GenericViewSet):
         """
         Return default response data success object. Status code is 200.
         """
-        data = {"data": {"success": True}}
+        # data = {"data": {"success": True}}
+        data = {"success": True}
+
         return self.response_ok(data)
 
     def response_deleted(self) -> Response:

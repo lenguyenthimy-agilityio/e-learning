@@ -13,6 +13,7 @@ from core.apis import BaseAPIViewSet
 from core.exception import TokenException, UserException
 from core.schema import base_responses
 from users.serializers import (
+    AvatarUploadSerializer,
     CustomTokenObtainPairSerializer,
     LoginSerializer,
     LogoutRequestSerializer,
@@ -60,11 +61,27 @@ class UserViewSet(BaseAPIViewSet):
         if not user:
             raise UserException(code="NOT_FOUND")
 
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
         return self.response_ok(data=serializer.data)
+
+    @extend_schema(request=AvatarUploadSerializer, responses={**base_responses, 200: UserSerializer})
+    @action(detail=True, methods=["post"], url_path="upload-avatar")
+    def upload_avatar(self, request: Request, *args, **kwargs) -> Response:
+        """
+        Upload user avatar.
+        """
+        user = self.get_object()
+        if not user:
+            raise UserException(code="NOT_FOUND")
+
+        serializer = AvatarUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user.avatar = serializer.validated_data["avatar"]
+        user.save()
+        return self.response_data_success()
 
 
 class AuthenticationViewSet(BaseAPIViewSet):

@@ -5,6 +5,8 @@ Serializers for the User model.
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from core.constants import MAX_FILE_SIZE
+from core.exception import FileUploadErrorMessage
 from core.serializers import BaseSerializer
 from users.models import User
 
@@ -20,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
         """
 
         model = User
-        fields = ["id", "username", "email", "first_name", "last_name", "created_at"]
+        fields = ["id", "username", "email", "first_name", "last_name", "created_at", "role", "avatar"]
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
@@ -53,18 +55,6 @@ class SignupSerializer(serializers.ModelSerializer):
         model = User
         fields = ("email", "password", "role", "first_name", "last_name")
         extra_kwargs = {"password": {"write_only": True}}
-
-    def validate_email(self, value):
-        """
-        Validate the email field.
-
-        Args:
-            value (string): The email value to validate.
-
-        """
-        if "@" not in value:
-            raise serializers.ValidationError("Enter a valid email address")
-        return value
 
     def validate_password(self, value):
         """
@@ -103,9 +93,9 @@ class CustomTokenObtainPairSerializer(BaseSerializer, TokenObtainPairSerializer)
             return super().validate(attrs)
         except serializers.ValidationError as e:
             raise e  # forward validation errors
-        except Exception:
+        except Exception as exc:
             # Convert AuthenticationFailed (401) into ValidationError (400)
-            raise serializers.ValidationError({"message": "Invalid email or password"})
+            raise serializers.ValidationError(str(exc))
 
 
 class LoginSerializer(BaseSerializer):
@@ -127,3 +117,23 @@ class LogoutRequestSerializer(BaseSerializer):
         required=True,
         write_only=True,
     )
+
+
+class AvatarUploadSerializer(BaseSerializer):
+    """
+    Serializer for uploading user avatar.
+    """
+
+    avatar = serializers.ImageField()
+
+    def validate_avatar(self, value):
+        """
+        Validate size image.
+        """
+        if value.size > MAX_FILE_SIZE:
+            raise serializers.ValidationError(FileUploadErrorMessage.FILE_TOO_LARGE)
+
+        if not value.content_type.startswith("image/"):
+            raise serializers.ValidationError(FileUploadErrorMessage.UNSUPPORTED_FILE_TYPE)
+
+        return value

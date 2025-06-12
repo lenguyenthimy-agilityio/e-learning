@@ -44,6 +44,16 @@ class UserErrorMessage(BaseErrorMessage):
     NOT_FOUND = "User not found."
 
 
+class FileUploadErrorMessage(BaseErrorMessage):
+    """
+    File upload error message class.
+    """
+
+    FILE_TOO_LARGE = "File is too large."
+    UNSUPPORTED_FILE_TYPE = "Unsupported file type."
+    UPLOAD_FAILED = "File upload failed."
+
+
 class BaseCustomException(Exception):
     """
     The base custom exception class.
@@ -134,3 +144,15 @@ class UserException(BaseCustomException):
     app_name = "USER"
     error = UserErrorMessage
     status_code = status.HTTP_400_BAD_REQUEST
+
+
+class FileUploadException(BaseCustomException):
+    """
+    File upload exception.
+    """
+
+    app_name = "FILE_UPLOAD"
+    error = BaseErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_dev_msg = "File upload failed."
+    default_user_message = "File upload failed. Please try again."

@@ -298,6 +298,7 @@ class BaseAPITestCase(APITestCase):
         Returns:
             Response: Response data
         """
+        format_data = params.get("format_data", "json")
         url = self.build_api_url(fragment)
         logger.debug("POST %s", url)
 
@@ -313,7 +314,7 @@ class BaseAPITestCase(APITestCase):
 
         self.api_client.credentials(**headers)
 
-        return self.api_client.post(url, format="json", data=data)
+        return self.api_client.post(url, format=format_data, data=data)
 
     def post_json_ok(self, fragment="", data=None, **params):
         """
