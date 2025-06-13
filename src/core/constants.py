@@ -51,4 +51,14 @@ class UserRole(BaseChoiceEnum):
     STUDENT = "Student"
 
 
+class CourseStatus(BaseChoiceEnum):
+    """
+    Status choices for the course model.
+    """
+
+    PUBLISHED = "Published"
+    UNPUBLISHED = "Unpublished"
+
+
 MAX_FILE_SIZE = 2 * 1024 * 1024  # 2 MB
+PAGINATION_LIMIT_DEFAULT = 100

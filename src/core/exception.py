@@ -14,6 +14,8 @@ class BaseErrorMessage:
     UNAUTHORIZED = "Unauthorized."
     FORBIDDEN = "Forbidden."
     NOT_FOUND = "Not found."
+    INVALID_OFFSET = "Invalid 'offset' parameter. Please provide a positive integer."
+    INVALID_LIMIT = "Invalid 'limit' parameter. Please provide a positive integer."
 
 
 class SystemErrorMessage(BaseErrorMessage):
