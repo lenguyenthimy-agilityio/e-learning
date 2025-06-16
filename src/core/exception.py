@@ -56,6 +56,15 @@ class FileUploadErrorMessage(BaseErrorMessage):
     UPLOAD_FAILED = "File upload failed."
 
 
+class CourseErrorMessage(BaseErrorMessage):
+    """
+    Token error message class.
+    """
+
+    NOT_FOUND = "Course not found."
+    ALREADY_EXISTS = "Course with this title already exists."
+
+
 class BaseCustomException(Exception):
     """
     The base custom exception class.
@@ -158,3 +167,13 @@ class FileUploadException(BaseCustomException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_dev_msg = "File upload failed."
     default_user_message = "File upload failed. Please try again."
+
+
+class CourseException(BaseCustomException):
+    """
+    File upload exception.
+    """
+
+    app_name = "COURSE"
+    error = CourseErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST

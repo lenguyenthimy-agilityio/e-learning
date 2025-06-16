@@ -17,6 +17,7 @@ from courses.filters import CourseFilter
 from courses.models import Course
 from courses.permissions import IsCourseOwner, IsInstructor
 from courses.serializers import (
+    CourseParamSerializer,
     CourseRequestSerializer,
     CourseSerializer,
     CourseStatusUpdateSerializer,
@@ -47,7 +48,7 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         return super().get_permissions()
 
     @extend_schema(
-        parameters=build_query_parameters(CourseUpdateSerializer),
+        parameters=build_query_parameters(CourseParamSerializer),
         responses={**base_responses, 200: CourseSerializer(many=True)},
     )
     def list(self, request: Request, *args, **kwargs) -> Response:
@@ -63,7 +64,7 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         """
         instructor = request.user
         # TODO: Check the title duplicate
-        serializer = self.get_serializer(data=request.data)
+        serializer = CourseSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save(instructor=instructor)
         return self.response_created(data=serializer.data)
@@ -74,8 +75,6 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         Retrieve a specific course by ID.
         """
         course = self.get_object()
-        if not course:
-            return
 
         serializer = CourseSerializer(course)
         return self.response_ok(data=serializer.data)
@@ -120,14 +119,14 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         course = self.get_object()
 
         # TODO: Uncomment and implement status update logic
-        # new_status = request.data.get("status")
+        new_status = request.data.get("status")
 
         # if new_status == CourseStatus.UNPUBLISHED.value and course.enrollments.exists():
         #     raise CourseException(code="HAS_ENROLLMENTS")
 
-        serializer = CourseSerializer(course)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        course.status = new_status
+        course.save()
+        serializer = self.get_serializer(course)
         return self.response_ok(data=serializer.data)
 
 

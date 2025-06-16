@@ -5,6 +5,7 @@ Serializers for the Course model.
 from rest_framework import serializers
 
 from core.constants import CourseStatus
+from core.exception import CourseErrorMessage
 from core.mixins import PaginationParamSerializerMixin
 from core.serializers import BaseSerializer
 from courses.models import Course
@@ -19,8 +20,20 @@ class CourseSerializer(serializers.ModelSerializer):
         """
 
         model = Course
-        fields = ["id", "title", "description", "instructor", "category", "created_at"]
+        fields = ["id", "title", "description", "instructor", "category", "created_at", "status"]
         read_only_fields = ["instructor", "created_at"]
+
+    def validate_title(self, value):
+        """
+        Ensure the title is unique per instructor.
+        """
+        request = self.context.get("request")
+        instructor = request.user if request else None
+
+        if instructor and Course.objects.filter(title__iexact=value, instructor=instructor).exists():
+            raise serializers.ValidationError(CourseErrorMessage.ALREADY_EXISTS)
+
+        return value
 
 
 class CourseRequestSerializer(serializers.ModelSerializer):
