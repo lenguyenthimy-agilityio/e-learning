@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
 API_APPS = [
     "users",
+    "courses",
 ]
 
 INSTALLED_APPS += API_APPS
@@ -85,7 +86,7 @@ DOMAIN: str = config("DOMAIN", default="http://localhost:8000")
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework_simplejwt.authentication.JWTAuthentication"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 10,
     "EXCEPTION_HANDLER": "core.exception_handler.process_exception",
 }

@@ -14,7 +14,6 @@ rights of the Software.
 import logging
 import uuid
 
-from django.contrib.auth.hashers import make_password
 from requests import Response
 from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -79,32 +78,11 @@ class BaseAPITestCase(APITestCase):
         Clean up the test environment for a test case after a test run.
         """
 
-    def make_user(
-        self,
-        username="user",
-        first_name=None,
-        last_name=None,
-        email=None,
-        role=UserRole.STUDENT.value,
-        password="123456",
-        is_staff=False,
-        is_superuser=False,
-    ):
+    def make_user(self, role=UserRole.STUDENT.value):
         """
         Create a user for testing.
         """
-        assert username
-        assert password
-        user = UserFactory(
-            username=username,
-            first_name=first_name or username,
-            last_name=last_name or username,
-            email=email or f"{username}@domain.com",
-            role=role,
-            is_staff=is_staff,
-            is_superuser=is_superuser,
-            password=make_password(password),
-        )
+        user = UserFactory.create(role=role)
 
         return user
 

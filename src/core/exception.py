@@ -14,6 +14,8 @@ class BaseErrorMessage:
     UNAUTHORIZED = "Unauthorized."
     FORBIDDEN = "Forbidden."
     NOT_FOUND = "Not found."
+    INVALID_OFFSET = "Invalid 'offset' parameter. Please provide a positive integer."
+    INVALID_LIMIT = "Invalid 'limit' parameter. Please provide a positive integer."
 
 
 class SystemErrorMessage(BaseErrorMessage):
@@ -52,6 +54,25 @@ class FileUploadErrorMessage(BaseErrorMessage):
     FILE_TOO_LARGE = "File is too large."
     UNSUPPORTED_FILE_TYPE = "Unsupported file type."
     UPLOAD_FAILED = "File upload failed."
+
+
+class CourseErrorMessage(BaseErrorMessage):
+    """
+    Course error message class.
+    """
+
+    NOT_FOUND = "Course not found."
+    ALREADY_EXISTS = "Course with this title already exists."
+    UNPUBLISHED = "Course is unpublished."
+    HAS_ENROLLMENTS = "Course has enrollments."
+
+
+class EnrollmentErrorMessage(BaseErrorMessage):
+    """
+    Enrollment error message class.
+    """
+
+    ALREADY_EXISTS = "Already enroll with this course."
 
 
 class BaseCustomException(Exception):
@@ -156,3 +177,23 @@ class FileUploadException(BaseCustomException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_dev_msg = "File upload failed."
     default_user_message = "File upload failed. Please try again."
+
+
+class CourseException(BaseCustomException):
+    """
+    Course exception.
+    """
+
+    app_name = "COURSE"
+    error = CourseErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
+class EnrollmentException(BaseCustomException):
+    """
+    Enrollment exception.
+    """
+
+    app_name = "ENROLLMENT"
+    error = EnrollmentErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
