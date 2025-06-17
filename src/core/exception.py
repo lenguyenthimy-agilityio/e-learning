@@ -58,11 +58,21 @@ class FileUploadErrorMessage(BaseErrorMessage):
 
 class CourseErrorMessage(BaseErrorMessage):
     """
-    Token error message class.
+    Course error message class.
     """
 
     NOT_FOUND = "Course not found."
     ALREADY_EXISTS = "Course with this title already exists."
+    UNPUBLISHED = "Course is unpublished."
+    HAS_ENROLLMENTS = "Course has enrollments."
+
+
+class EnrollmentErrorMessage(BaseErrorMessage):
+    """
+    Enrollment error message class.
+    """
+
+    ALREADY_EXISTS = "Already enroll with this course."
 
 
 class BaseCustomException(Exception):
@@ -171,9 +181,19 @@ class FileUploadException(BaseCustomException):
 
 class CourseException(BaseCustomException):
     """
-    File upload exception.
+    Course exception.
     """
 
     app_name = "COURSE"
     error = CourseErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
+class EnrollmentException(BaseCustomException):
+    """
+    Enrollment exception.
+    """
+
+    app_name = "ENROLLMENT"
+    error = EnrollmentErrorMessage
     status_code = status.HTTP_400_BAD_REQUEST

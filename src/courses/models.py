@@ -3,7 +3,7 @@
 from django.db import models
 
 from core.constants import CourseStatus
-from core.models import AbstractTimeStampedModel
+from core.models import AbstractTimeStampedModel, AbstractUUIDModel
 from users.models import User
 
 
@@ -44,3 +44,28 @@ class Course(AbstractTimeStampedModel):
         String representation of the Course model.
         """
         return str(self.title)
+
+
+# --- Enrollment ---
+class Enrollment(AbstractTimeStampedModel, AbstractUUIDModel):
+    """
+    Enrollment model.
+    """
+
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="enrollments")
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="enrollments")
+    enrolled_at = models.DateTimeField(auto_now_add=True)
+    completed = models.BooleanField(default=False)
+
+    class Meta:
+        """
+        Class Meta.
+        """
+
+        unique_together = ("student", "course")
+
+    def __str__(self):
+        """
+        String representation of the Enrollment model.
+        """
+        return f"{self.student.username} enrolled in {self.course.title}"

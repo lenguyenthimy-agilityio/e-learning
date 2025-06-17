@@ -6,7 +6,7 @@ from core.constants import CourseStatus, UserRole
 from core.tests import BaseAPITestCase
 from courses.apis import CourseViewSet
 from courses.factories import CategoryFactory, CourseFactory
-from courses.models import Course
+from courses.models import Course, Enrollment
 from users.models import User
 
 
@@ -98,6 +98,17 @@ class CourseAPITestCase(BaseAPITestCase):
         assert response.status_code == 204
         assert not Course.objects.filter(id=self.course.id).exists()
 
+    def test_delete_course_has_enrollments(self):
+        """
+        Test deleting a course that has enrollments.
+        """
+        student = self.make_user(role=UserRole.STUDENT.value)
+        self.course.enrollments.create(student=student)
+
+        response = self.delete_json_bad_request(fragment=self.fragment)
+        assert response.status_code == 400
+        assert Course.objects.filter(id=self.course.id).exists()
+
     def test_set_status_to_publish_success(self):
         """
         Test publishing a course.
@@ -166,11 +177,29 @@ class CourseAPITestCase(BaseAPITestCase):
         Test that a course with enrollments cannot be unpublished.
         """
         student = self.make_user(role=UserRole.STUDENT.value)
-        # TODO: need to update the Course model to include enrollments
         self.course.enrollments.create(student=student)
 
         response = self.post_json_bad_request(
             fragment=f"{self.course.id}/set-status", data={"status": CourseStatus.UNPUBLISHED.value}
         )
         assert response.status_code == 400
-        assert "Cannot unpublish course with enrolled students" in response.data["detail"]
+
+    def test_view_enrolled_students_success(self):
+        """
+        Test viewing enrolled students in a course.
+        """
+        student_1 = self.make_user(role=UserRole.STUDENT.value)
+        student_2 = self.make_user(role=UserRole.STUDENT.value)
+        category = CategoryFactory()
+        course = CourseFactory(
+            category=category,
+            instructor=self.instructor,
+        )
+        Enrollment.objects.create(student=student_1, course=course)
+        Enrollment.objects.create(student=student_2, course=course)
+        self.set_authenticate(user=self.instructor)
+
+        response = self.get_json_ok(fragment=f"{course.id}/students")
+
+        assert response.status_code == 200
+        assert len(response.data["data"]) == 2

@@ -15,14 +15,19 @@ from core.paginations import CustomPagination
 from core.schema import base_responses, build_query_parameters
 from courses.filters import CourseFilter
 from courses.models import Course
-from courses.permissions import IsCourseOwner, IsInstructor
+from courses.permissions import IsCourseOwner, IsInstructor, IsStudent
 from courses.serializers import (
     CourseParamSerializer,
     CourseRequestSerializer,
     CourseSerializer,
     CourseStatusUpdateSerializer,
     CourseUpdateSerializer,
+    EnrollmentRequestSerializer,
+    EnrollmentSerializer,
+    EnrollmentStudentSerializer,
+    MyEnrollmentSerializer,
 )
+from courses.services import CourseService, EnrollmentService
 
 
 class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
@@ -38,6 +43,14 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
     filterset_class = CourseFilter
     search_fields = ["title", "category__name"]
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def __init__(self, **kwargs):
+        """
+        Initialize the CourseViewSet.
+        """
+        super().__init__(**kwargs)
+        self.enrollment_service = EnrollmentService()
+        self.course_service = CourseService()
 
     def get_permissions(self):
         """
@@ -63,7 +76,6 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         Create a new course (instructors only).
         """
         instructor = request.user
-        # TODO: Check the title duplicate
         serializer = CourseSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save(instructor=instructor)
@@ -96,7 +108,7 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         Delete a course (if not enrolled by any student).
         """
         course = self.get_object()
-        # TODO: Check if the course has enrolled students
+        self.course_service.verify_destroy_course(course)
         course.delete()
         return self.response_deleted()
 
@@ -117,17 +129,85 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         Prevent unpublishing if the course has enrolled students.
         """
         course = self.get_object()
-
-        # TODO: Uncomment and implement status update logic
         new_status = request.data.get("status")
 
-        # if new_status == CourseStatus.UNPUBLISHED.value and course.enrollments.exists():
-        #     raise CourseException(code="HAS_ENROLLMENTS")
+        self.course_service.verify_update_status(course, new_status)
 
         course.status = new_status
         course.save()
         serializer = self.get_serializer(course)
         return self.response_ok(data=serializer.data)
 
+    @extend_schema(responses={**base_responses, 200: EnrollmentStudentSerializer(many=True)})
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="students",
+        permission_classes=[IsInstructor, IsCourseOwner],
+    )
+    def students(self, request: Request, *args, **kwargs) -> Response:
+        """
+        Get list of students enrolled in this course (instructor only).
+        """
+        course = self.get_object()
 
-apps = [CourseViewSet]
+        enrollments = self.enrollment_service.list_enrollment_specific_course(course)
+        page = self.paginate_queryset(enrollments)
+        serializer = EnrollmentStudentSerializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+
+class EnrollmentViewSet(BaseAPIViewSet):
+    """
+    Handling enrollments.
+    """
+
+    resource_name = "enrollments"
+    pagination_class = CustomPagination
+    permission_classes = [IsStudent]
+
+    def __init__(self, **kwargs):
+        """
+        Initialize the EnrollmentViewSet.
+        """
+        super().__init__(**kwargs)
+        self.course_service = CourseService()
+        self.enrollment_service = EnrollmentService()
+
+    @extend_schema(request=EnrollmentRequestSerializer, responses={**base_responses, 201: EnrollmentSerializer})
+    def create(self, request):
+        """
+        Enroll in a course.
+        """
+        user = request.user
+        serializer = EnrollmentRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        course_id = serializer.validated_data["course_id"]
+
+        course = self.course_service.get_course(course_id)
+
+        # Verify if the course is published
+        self.course_service.verify_course_status(course)
+
+        # Verify if the user is already enrolled in the course
+        self.enrollment_service.verify(course, user)
+
+        enrollment = self.enrollment_service.create(course, user)
+        response_data = EnrollmentSerializer(enrollment).data
+        return self.response_created(data=response_data)
+
+    @extend_schema(responses={**base_responses, 200: MyEnrollmentSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="me")
+    def my_enrollments(self, request):
+        """
+        List all enrollments for the authenticated user.
+        """
+        enrollments = self.enrollment_service.list(request.user)
+        page = self.paginate_queryset(enrollments)
+        serializer = MyEnrollmentSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+
+apps = [CourseViewSet, EnrollmentViewSet]
