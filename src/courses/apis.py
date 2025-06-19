@@ -28,6 +28,8 @@ from courses.serializers import (
     MyEnrollmentSerializer,
 )
 from courses.services import CourseService, EnrollmentService
+from lessons.serializers import LessonSerializer
+from lessons.services import LessonService
 
 
 class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
@@ -36,7 +38,7 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
     """
 
     resource_name = "courses"
-    queryset = Course.objects.all()
+    queryset = Course.objects.select_related("instructor", "category").all()
     serializer_class = CourseSerializer
     filter_backends = [DjangoFilterBackend]
     pagination_class = CustomPagination
@@ -51,6 +53,7 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         super().__init__(**kwargs)
         self.enrollment_service = EnrollmentService()
         self.course_service = CourseService()
+        self.lesson_service = LessonService()
 
     def get_permissions(self):
         """
@@ -82,7 +85,7 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         return self.response_created(data=serializer.data)
 
     @extend_schema(responses={**base_responses, 200: CourseSerializer})
-    def retrieve(self, request: Request, **kwargs) -> Response:
+    def retrieve(self, request: Request, *args, **kwargs) -> Response:
         """
         Retrieve a specific course by ID.
         """
@@ -102,7 +105,7 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         serializer.save()
         return self.response_ok(data=serializer.data)
 
-    @extend_schema(responses={204: None})
+    @extend_schema(responses={**base_responses, 204: None})
     def destroy(self, request, *args, **kwargs):
         """
         Delete a course (if not enrolled by any student).
@@ -131,6 +134,7 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         course = self.get_object()
         new_status = request.data.get("status")
 
+        # DO NOT allow changing status if the course has enrolled students
         self.course_service.verify_update_status(course, new_status)
 
         course.status = new_status
@@ -155,6 +159,30 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         page = self.paginate_queryset(enrollments)
         serializer = EnrollmentStudentSerializer(page, many=True)
 
+        return self.get_paginated_response(serializer.data)
+
+    @extend_schema(
+        responses={**base_responses, 200: LessonSerializer(many=True)},
+    )
+    @action(detail=True, methods=["get"], url_path="lessons")
+    def lessons(self, request: Request, *args, **kwargs) -> Response:
+        """
+        List all lessons for a course.
+        """
+        course = self.course_service.get_course(self.kwargs["pk"])
+        user = request.user
+
+        self.lesson_service.verify_lesson_enrolled(user, course)
+
+        queryset = course.lessons.all()
+
+        # Optional filter by title
+        title = request.query_params.get("title")
+        if title:
+            queryset = queryset.filter(title__icontains=title)
+
+        page = self.paginate_queryset(queryset)
+        serializer = LessonSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
 

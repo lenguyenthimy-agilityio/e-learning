@@ -7,6 +7,7 @@ from core.tests import BaseAPITestCase
 from courses.apis import CourseViewSet
 from courses.factories import CategoryFactory, CourseFactory
 from courses.models import Course, Enrollment
+from lessons.factories import LessonFactory
 from users.models import User
 
 
@@ -203,3 +204,48 @@ class CourseAPITestCase(BaseAPITestCase):
 
         assert response.status_code == 200
         assert len(response.data["data"]) == 2
+
+    def test_student_get_list_lessons_for_course(self):
+        """
+        Test listing lessons for a course.
+        """
+        student = self.make_user(role=UserRole.STUDENT.value)
+
+        lesson = LessonFactory(course=self.course)
+        Enrollment.objects.create(course=self.course, student=student)
+
+        self.set_authenticate(user=student)
+        response = self.get_json_ok(fragment=f"{self.course.id}/lessons")
+        assert response.status_code == 200
+        assert response.data["data"][0]["id"] == lesson.id
+
+    def test_student_can_not_get_list_lessons_for_course_not_enroll(self):
+        """
+        Test listing lessons for a course.
+        """
+        student = self.make_user(role=UserRole.STUDENT.value)
+
+        LessonFactory(course=self.course)
+        self.set_authenticate(user=student)
+
+        response = self.get_json_forbidden(fragment=f"{self.course.id}/lessons")
+        assert response.status_code == 403
+
+    def test_list_lessons_filtered_by_title(self):
+        """
+        Test listing lessons filtered by title.
+        """
+        student = self.make_user(role=UserRole.STUDENT.value)
+        self.set_authenticate(user=student)
+
+        # Add an extra lesson with a different title
+        LessonFactory(course=self.course, title="Django Basics")
+        LessonFactory(course=self.course, title="Advanced Django")
+        Enrollment.objects.create(course=self.course, student=student)
+
+        response = self.get_json_ok(fragment=f"{self.course.id}/lessons/?title=Django Basics")
+
+        assert response.status_code == 200
+        data = response.data["data"]
+        assert len(data) == 1
+        assert "Django Basics" in data[0]["title"]

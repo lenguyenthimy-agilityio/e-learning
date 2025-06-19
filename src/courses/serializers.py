@@ -76,7 +76,7 @@ class CourseUpdateSerializer(serializers.ModelSerializer):
 
 class CourseParamSerializer(PaginationParamSerializerMixin):
     """
-    Application user list Parameter Serializer.
+    Course list Parameter Serializer.
     """
 
     title = serializers.CharField(

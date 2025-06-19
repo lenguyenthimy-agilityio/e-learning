@@ -75,6 +75,17 @@ class EnrollmentErrorMessage(BaseErrorMessage):
     ALREADY_EXISTS = "Already enroll with this course."
 
 
+class LessonErrorMessage(BaseErrorMessage):
+    """
+    Lesson error message class.
+    """
+
+    NOT_FOUND = "Lesson not found."
+    ALREADY_COMPLETED = "Lesson with this title already completed."
+    HAS_PROGRESS = "Lesson has progress associated with it."
+    NOT_ENROLLED = "You are not enrolled in this course to access the lesson."
+
+
 class BaseCustomException(Exception):
     """
     The base custom exception class.
@@ -196,4 +207,14 @@ class EnrollmentException(BaseCustomException):
 
     app_name = "ENROLLMENT"
     error = EnrollmentErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
+class LessonException(BaseCustomException):
+    """
+    Lesson exception.
+    """
+
+    app_name = "LESSON"
+    error = LessonErrorMessage
     status_code = status.HTTP_400_BAD_REQUEST
