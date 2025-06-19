@@ -4,6 +4,7 @@ Serializers for the Lesson model.
 
 from rest_framework import serializers
 
+from core.mixins import PaginationParamSerializerMixin
 from core.serializers import BaseSerializer
 from lessons.models import Lesson
 
@@ -47,3 +48,14 @@ class LessonSerializer(serializers.ModelSerializer):
 
         model = Lesson
         fields = ["id", "title", "content", "video_url", "course_id"]
+
+
+class LessonParamSerializer(PaginationParamSerializerMixin):
+    """
+    Lesson list Parameter Serializer.
+    """
+
+    title = serializers.CharField(
+        required=False,
+        help_text="Filter by title.",
+    )

@@ -113,9 +113,8 @@ class LessonViewSet(BaseAPIViewSet):
         """
         user = request.user
         lesson = self.get_object()
-        course = lesson.course
 
-        progress = self.lesson_service.complete_lesson(user, course)
+        progress = self.lesson_service.complete_lesson(user, lesson)
 
         return self.response_ok(
             data={"id": str(lesson.id), "status": "completed", "completed_at": progress.date.isoformat()}

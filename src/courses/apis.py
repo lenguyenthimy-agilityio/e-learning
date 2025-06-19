@@ -28,7 +28,6 @@ from courses.serializers import (
     MyEnrollmentSerializer,
 )
 from courses.services import CourseService, EnrollmentService
-from lessons.models import Lesson
 from lessons.serializers import LessonSerializer
 from lessons.services import LessonService
 
@@ -39,7 +38,7 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
     """
 
     resource_name = "courses"
-    queryset = Course.objects.all()
+    queryset = Course.objects.select_related("instructor", "category").all()
     serializer_class = CourseSerializer
     filter_backends = [DjangoFilterBackend]
     pagination_class = CustomPagination
@@ -162,19 +161,20 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
 
         return self.get_paginated_response(serializer.data)
 
-    extend_schema(responses={200: LessonSerializer(many=True)})
-
+    @extend_schema(
+        responses={**base_responses, 200: LessonSerializer(many=True)},
+    )
     @action(detail=True, methods=["get"], url_path="lessons")
     def lessons(self, request: Request, *args, **kwargs) -> Response:
         """
         List all lessons for a course.
         """
-        course = self.get_object()
+        course = self.course_service.get_course(self.kwargs["pk"])
         user = request.user
 
         self.lesson_service.verify_lesson_enrolled(user, course)
 
-        queryset = Lesson.objects.filter(course=course)
+        queryset = course.lessons.all()
 
         # Optional filter by title
         title = request.query_params.get("title")

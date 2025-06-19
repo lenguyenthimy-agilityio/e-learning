@@ -53,9 +53,9 @@ class LessonService:
         Verify if a student can complete a lesson.
         """
         if not Enrollment.objects.filter(course=lesson.course, student=user).exists():
-            raise LessonException(code="EnrollmentRequired")
+            raise LessonException(code="NOT_ENROLLED")
         if lesson.progress.filter(user=user, completed=True).exists():
-            raise LessonException(code="LessonAlreadyCompleted")
+            raise LessonException(code="ALREADY_COMPLETED")
 
     def complete_lesson(self, user, lesson):
         """

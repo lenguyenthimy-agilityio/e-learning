@@ -81,7 +81,7 @@ class LessonErrorMessage(BaseErrorMessage):
     """
 
     NOT_FOUND = "Lesson not found."
-    ALREADY_EXISTS = "Lesson with this title already exists."
+    ALREADY_COMPLETED = "Lesson with this title already completed."
     HAS_PROGRESS = "Lesson has progress associated with it."
     NOT_ENROLLED = "You are not enrolled in this course to access the lesson."
 

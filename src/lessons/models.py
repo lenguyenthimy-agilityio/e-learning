@@ -36,5 +36,5 @@ class LessonProgress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="progress")
     completed = models.BooleanField(default=False)
-    time_spent = models.DurationField()
+    time_spent = models.DurationField(blank=True, null=True)
     date = models.DateField(auto_now_add=True)
