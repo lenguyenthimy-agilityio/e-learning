@@ -172,7 +172,7 @@ class CourseViewSet(BaseAPIViewSet, viewsets.ModelViewSet):
         course = self.course_service.get_course(self.kwargs["pk"])
         user = request.user
 
-        self.lesson_service.verify_lesson_enrolled(user, course)
+        self.course_service.verify_enrolled(user, course)
 
         queryset = course.lessons.all()
 
