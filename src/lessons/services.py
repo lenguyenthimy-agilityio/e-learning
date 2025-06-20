@@ -2,8 +2,6 @@
 Lesson services module.
 """
 
-from rest_framework.exceptions import PermissionDenied
-
 from core.exception import LessonException
 from courses.models import Enrollment
 from lessons.models import Lesson
@@ -33,13 +31,6 @@ class LessonService:
         Get all lessons for a specific course.
         """
         return Lesson.objects.filter(course=course)
-
-    def verify_lesson_enrolled(self, user, course):
-        """
-        Verify if a lesson enrolled for student access.
-        """
-        if user != course.instructor and not Enrollment.objects.filter(course=course, student=user).exists():
-            raise PermissionDenied("You do not have access to this lesson.")
 
     def verify_lesson_has_progress(self, lesson):
         """

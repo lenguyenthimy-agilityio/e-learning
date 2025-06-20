@@ -14,10 +14,9 @@ from core.apis import BaseAPIViewSet
 
 # from lessons.exceptions import LessonException
 from core.schema import base_responses
-from courses.permissions import IsStudent
+from courses.permissions import IsEntityCourseOwner, IsStudent
 from courses.services import CourseService
 from lessons.models import Lesson
-from lessons.permissions import IsOwnerLesson
 from lessons.serializers import LessonRequestSerializer, LessonSerializer, LessonUpdateSerializer
 from lessons.services import LessonService
 
@@ -45,7 +44,7 @@ class LessonViewSet(BaseAPIViewSet):
         Apply custom permissions based on the action being performed.
         """
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsOwnerLesson()]
+            return [IsEntityCourseOwner()]
         elif self.action == "complete_lesson":
             return [IsStudent()]
 
@@ -89,7 +88,7 @@ class LessonViewSet(BaseAPIViewSet):
         user = request.user
 
         # access control: student must be enrolled OR instructor
-        self.lesson_service.verify_lesson_enrolled(user, course)
+        self.course_service.verify_enrolled(user, course)
 
         return self.response_ok(data=LessonSerializer(lesson).data)
 

@@ -17,9 +17,23 @@ class QuizRequestSerializer(BaseSerializer):
     course_id = serializers.IntegerField()
 
 
+class QuizUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for updating quiz details.
+    """
+
+    class Meta:
+        """
+        Meta class for QuizUpdateSerializer.
+        """
+
+        model = Quiz
+        fields = ["title"]
+
+
 class QuestionSerializer(serializers.ModelSerializer):
     """
-    Serializer for Question model.
+    Serializer for Question model, used for creating and updating questions in a quiz.
     """
 
     class Meta:
@@ -28,7 +42,19 @@ class QuestionSerializer(serializers.ModelSerializer):
         """
 
         model = Question
-        fields = ["id", "text", "options", "correct_answer", "quiz"]
+        fields = ["id", "text", "options", "correct_answer"]
+        # quiz is not required from input, handled in view
+        extra_kwargs = {
+            "quiz": {"write_only": True, "required": False},
+        }
+
+    def validate(self, attrs):
+        """
+        Validate the question data to ensure the correct answer is one of the options.
+        """
+        if attrs["correct_answer"] not in attrs["options"]:
+            raise serializers.ValidationError({"correct_answer": "Correct answer must be one of the options."})
+        return attrs
 
 
 class QuestionDisplaySerializer(serializers.ModelSerializer):

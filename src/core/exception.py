@@ -86,6 +86,17 @@ class LessonErrorMessage(BaseErrorMessage):
     NOT_ENROLLED = "You are not enrolled in this course to access the lesson."
 
 
+class QuizErrorMessage(BaseErrorMessage):
+    """
+    Quiz error message class.
+    """
+
+    NOT_FOUND = "Quiz not found."
+    ALREADY_COMPLETED = "Quiz already completed."
+    NOT_ENROLLED = "You are not enrolled in this course to access the quiz."
+    MISSING_ANSWER = "All questions must be answered."
+
+
 class BaseCustomException(Exception):
     """
     The base custom exception class.
@@ -217,4 +228,14 @@ class LessonException(BaseCustomException):
 
     app_name = "LESSON"
     error = LessonErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
+class QuizException(BaseCustomException):
+    """
+    Quiz exception.
+    """
+
+    app_name = "QUIZ"
+    error = QuizErrorMessage
     status_code = status.HTTP_400_BAD_REQUEST

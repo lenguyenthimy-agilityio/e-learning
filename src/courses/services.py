@@ -2,6 +2,8 @@
 The module contains services related to course management.
 """
 
+from rest_framework.exceptions import PermissionDenied
+
 from core.constants import CourseStatus
 from core.exception import CourseException, EnrollmentException
 from courses.models import Course, Enrollment
@@ -88,3 +90,10 @@ class CourseService:
         """
         if new_status == CourseStatus.UNPUBLISHED.value and course.enrollments.exists():
             raise CourseException(code="HAS_ENROLLMENTS")
+
+    def verify_enrolled(self, user, course):
+        """
+        Verify if a lesson enrolled for student access.
+        """
+        if user != course.instructor and not Enrollment.objects.filter(course=course, student=user).exists():
+            raise PermissionDenied("You do not have access to this lesson.")
