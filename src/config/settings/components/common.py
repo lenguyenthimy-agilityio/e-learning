@@ -47,6 +47,7 @@ API_APPS = [
     "courses",
     "lessons",
     "quizzes",
+    "classes",
 ]
 
 INSTALLED_APPS += API_APPS
@@ -147,3 +148,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER: str = config("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD: str = config("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL: str = config("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)

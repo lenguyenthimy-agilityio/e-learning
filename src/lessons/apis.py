@@ -11,8 +11,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from core.apis import BaseAPIViewSet
-
-# from lessons.exceptions import LessonException
 from core.schema import base_responses
 from courses.permissions import IsEntityCourseOwner, IsStudent
 from courses.services import CourseService

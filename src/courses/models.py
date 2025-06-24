@@ -8,7 +8,7 @@ from users.models import User
 
 
 # --- Category ---
-class Category(AbstractTimeStampedModel):
+class Category(AbstractTimeStampedModel, AbstractUUIDModel):
     """
     Category model to categorize courses.
     """

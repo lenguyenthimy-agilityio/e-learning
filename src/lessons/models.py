@@ -4,12 +4,13 @@ Lesson model for the courses app.
 
 from django.db import models
 
+from core.models import AbstractTimeStampedModel, AbstractUUIDModel
 from courses.models import Course
 from users.models import User
 
 
 # --- Lesson ---
-class Lesson(models.Model):
+class Lesson(AbstractTimeStampedModel, AbstractUUIDModel):
     """
     Lesson model to represent a lesson in a course.
     """
@@ -28,7 +29,7 @@ class Lesson(models.Model):
 
 
 # --- Lesson Progress ---
-class LessonProgress(models.Model):
+class LessonProgress(AbstractTimeStampedModel):
     """
     LessonProgress model to track user progress in lessons.
     """

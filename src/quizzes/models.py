@@ -4,11 +4,12 @@ Quizzes models for the online learning platform.
 
 from django.db import models
 
+from core.models import AbstractTimeStampedModel, AbstractUUIDModel
 from courses.models import Course
 from users.models import User
 
 
-class Quiz(models.Model):
+class Quiz(AbstractTimeStampedModel, AbstractUUIDModel):
     """
     Quiz model to represent a quiz in a course.
     """
@@ -17,7 +18,7 @@ class Quiz(models.Model):
     title = models.CharField(max_length=255)
 
 
-class Question(models.Model):
+class Question(AbstractTimeStampedModel, AbstractUUIDModel):
     """
     Question model to represent a question in a quiz.
     """
@@ -28,7 +29,7 @@ class Question(models.Model):
     correct_answer = models.CharField(max_length=255)
 
 
-class QuizSubmission(models.Model):
+class QuizSubmission(AbstractTimeStampedModel, AbstractUUIDModel):
     """
     QuizSubmission model to track student submissions for quizzes.
     """
