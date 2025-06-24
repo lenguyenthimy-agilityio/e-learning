@@ -2,18 +2,19 @@
 Tasks for sending reminders about live classes.
 """
 
-from celery import shared_task
 from celery.utils.log import get_task_logger
+from django.conf import settings
 from django.core.mail import send_mass_mail
 from django.utils.timezone import localtime
 
 from classes.models import LiveClass
+from config.celery import app
 from courses.models import Enrollment
 
 logger = get_task_logger(__name__)
 
 
-@shared_task
+@app.task(name="send_class_reminder_email")
 def send_class_reminder_email(live_class_id):
     """
     Send reminder emails for a live class.
@@ -22,9 +23,6 @@ def send_class_reminder_email(live_class_id):
     if not live_class:
         logger.error(f"The live class with ID {live_class_id} does not exist.")
         return
-
-    if live_class.is_canceled:
-        return "ClassCanceled"
 
     subject = f"Reminder: {live_class.title} is starting soon"
     message = (
@@ -39,12 +37,14 @@ def send_class_reminder_email(live_class_id):
 
     messages = []
     for enrollment in enrollments:
+        email = enrollment.student.email
+        logger.info(f"Sending reminder email to {email} for live class {live_class.title}")
         messages.append(
             (
                 subject,
                 message,
-                "no-reply@yourdomain.com",
-                [enrollment.student.email],
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
             )
         )
 

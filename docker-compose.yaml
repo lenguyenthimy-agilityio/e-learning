@@ -65,26 +65,6 @@ services:
             - redis
         networks:
             - e_learning_network
-    celery-beat:
-        build: .
-        command: bin/dj-celery-beat.sh
-        environment:
-            DJANGO_ENV: local
-            DATABASE_HOST: db
-            DATABASE_NAME: e-learning-v3
-            DATABASE_USER: postgres
-            DATABASE_PASSWORD: postgres
-            DATABASE_ENGINE: django.db.backends.postgresql
-            PORT: 8000
-            CELERY_BROKER_URL: redis://redis:6379/0
-            CELERY_BROKER_TRANSPORT: redis
-        volumes:
-            - .:/home/app
-        networks:
-            - e_learning_network
-        depends_on:
-            - db
-            - redis
 
 networks:
     e_learning_network:

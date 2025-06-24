@@ -21,5 +21,3 @@ INTERNAL_IPS = [
     "localhost",
     "0.0.0.0",
 ]
-
-CELERY_TASK_ALWAYS_EAGER = True

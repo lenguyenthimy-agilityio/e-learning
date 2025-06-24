@@ -77,7 +77,7 @@ class LiveClassViewSet(BaseAPIViewSet):
 
         send_class_reminder_email.delay_on_commit(live_class.id)  # Celery task
 
-        return self.response_ok(data={"message": "Reminder emails have been queued."})
+        return self.response_data_success()
 
 
 apps = [LiveClassViewSet]

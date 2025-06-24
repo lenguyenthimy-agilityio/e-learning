@@ -4,9 +4,7 @@ Celery configuration for the Django project.
 
 from decouple import config
 
-from config.settings.components.common import INSTALLED_APPS
-
-INSTALLED_APPS += ["django_celery_beat"]
+# INSTALLED_APPS += ["django_celery_beat"]
 
 # Celery config
 CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/0")
