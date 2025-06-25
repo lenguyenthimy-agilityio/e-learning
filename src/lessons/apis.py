@@ -2,6 +2,7 @@
 APIs for the lessons app.
 """
 
+from datetime import date
 from typing import Any
 
 from drf_spectacular.utils import extend_schema
@@ -11,12 +12,19 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from core.apis import BaseAPIViewSet
-from core.schema import base_responses
+from core.constants import DailyProcessStatus
+from core.schema import base_responses, build_query_parameters
 from courses.permissions import IsEntityCourseOwner, IsStudent
 from courses.services import CourseService
 from lessons.models import Lesson
-from lessons.serializers import LessonRequestSerializer, LessonSerializer, LessonUpdateSerializer
-from lessons.services import LessonService
+from lessons.serializers import (
+    DailyProgressCourseSerializer,
+    DailyProgressParamSerializer,
+    LessonRequestSerializer,
+    LessonSerializer,
+    LessonUpdateSerializer,
+)
+from lessons.services import DailyProcessService, LessonService
 
 
 class LessonViewSet(BaseAPIViewSet):
@@ -114,8 +122,48 @@ class LessonViewSet(BaseAPIViewSet):
         progress = self.lesson_service.complete_lesson(user, lesson)
 
         return self.response_ok(
-            data={"id": str(lesson.id), "status": "completed", "completed_at": progress.date.isoformat()}
+            data={
+                "id": str(lesson.id),
+                "status": DailyProcessStatus.COMPLETED.value,
+                "completed_at": progress.date.isoformat(),
+            }
         )
 
 
-apps = [LessonViewSet]
+class DailyProgressViewSet(BaseAPIViewSet):
+    """
+    ViewSet to manage daily progress of lessons.
+    """
+
+    permission_classes = [IsAuthenticated, IsStudent]
+    resource_name = "daily-progress"
+
+    def __init__(self, **kwargs: Any) -> None:
+        """
+        Initialize the DailyProgressViewSet.
+        """
+        super().__init__(**kwargs)
+        self.daily_service = DailyProcessService()
+
+    @extend_schema(
+        parameters=build_query_parameters(DailyProgressParamSerializer),
+        responses={**base_responses, 200: DailyProgressCourseSerializer(many=True)},
+    )
+    @action(detail=False, methods=["get"], url_path="courses")
+    def courses(self, request: Request, *args, **kwargs) -> Response:
+        """
+        View number of lessons completed per course on a given day.
+        """
+        user = request.user
+        serializer = DailyProgressParamSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        query_date = serializer.validated_data.get("date", date.today())
+
+        # Query completed lessons grouped by course
+        result = self.daily_service.daily_process_lessons(user, query_date)
+
+        return self.response_ok(data=result)
+
+
+apps = [LessonViewSet, DailyProgressViewSet]

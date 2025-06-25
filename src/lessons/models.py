@@ -4,6 +4,7 @@ Lesson model for the courses app.
 
 from django.db import models
 
+from core.constants import DailyProcessStatus
 from core.models import AbstractTimeStampedModel, AbstractUUIDModel
 from courses.models import Course
 from users.models import User
@@ -36,6 +37,10 @@ class LessonProgress(AbstractTimeStampedModel):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="progress")
-    completed = models.BooleanField(default=False)
+    status = models.CharField(
+        max_length=20,
+        choices=DailyProcessStatus.choices(),
+        default=DailyProcessStatus.IN_PROGRESS.value,
+    )
     time_spent = models.DurationField(blank=True, null=True)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField()

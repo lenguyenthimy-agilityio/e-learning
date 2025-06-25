@@ -3,6 +3,7 @@ Lesson factories for creating lesson instances in tests.
 """
 
 from core import factories
+from core.constants import DailyProcessStatus
 from courses.factories import CourseFactory
 
 
@@ -38,6 +39,6 @@ class LessonProgressFactory(factories.ModelFactory):
 
     user = factories.SubFactory("users.factories.UserFactory")
     lesson = factories.SubFactory(LessonFactory)
-    completed = factories.Faker("boolean")
+    status = DailyProcessStatus.IN_PROGRESS.value
     time_spent = factories.Faker("time_delta")
     date = factories.Faker("date")
