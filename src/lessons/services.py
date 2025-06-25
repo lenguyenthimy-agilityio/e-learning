@@ -2,9 +2,14 @@
 Lesson services module.
 """
 
+from datetime import date
+
+from django.db.models import Count, Q
+
+from core.constants import DailyProcessStatus
 from core.exception import LessonException
 from courses.models import Enrollment
-from lessons.models import Lesson
+from lessons.models import Lesson, LessonProgress
 
 
 class LessonService:
@@ -45,7 +50,7 @@ class LessonService:
         """
         if not Enrollment.objects.filter(course=lesson.course, student=user).exists():
             raise LessonException(code="NOT_ENROLLED")
-        if lesson.progress.filter(user=user, completed=True).exists():
+        if lesson.progress.filter(user=user, status=DailyProcessStatus.COMPLETED.value).exists():
             raise LessonException(code="ALREADY_COMPLETED")
 
     def complete_lesson(self, user, lesson):
@@ -54,8 +59,36 @@ class LessonService:
         """
         self.verify_to_complete_lesson(user, lesson)
 
-        progress, _ = lesson.progress.get_or_create(user=user)
-        progress.completed = True
-        progress.save()
+        progress, _ = lesson.progress.get_or_create(
+            user=user, status=DailyProcessStatus.IN_PROGRESS.value, date=date.today()
+        )
 
         return progress
+
+
+class DailyProcessService:
+    """
+    Service class for handling daily processes related to lessons.
+    """
+
+    def daily_process_lessons(self, user, query_date):
+        """
+        Process all completed lessons for the day.
+        """
+        progress = (
+            LessonProgress.objects.filter(user=user, date=query_date)
+            .values("lesson__course__title")
+            .annotate(
+                completed=Count("id", filter=Q(status=DailyProcessStatus.COMPLETED.value)),
+                in_progress=Count("id", filter=Q(status=DailyProcessStatus.IN_PROGRESS.value)),
+            )
+        )
+
+        return [
+            {
+                "course_title": p.get("lesson__course__title"),
+                "completed": p.get("completed"),
+                "in_progress": p.get("in_progress"),
+            }
+            for p in progress
+        ]

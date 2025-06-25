@@ -2,7 +2,7 @@
 The module contains tests for the lessons app.
 """
 
-from core.constants import UserRole
+from core.constants import DailyProcessStatus, UserRole
 from core.tests import BaseAPITestCase
 from courses.factories import CategoryFactory, CourseFactory
 from courses.models import Enrollment
@@ -112,7 +112,7 @@ class LessonAPITestCase(BaseAPITestCase):
         """
         Test that a lesson with progress cannot be deleted.
         """
-        LessonProgressFactory(user=self.student, lesson=self.lesson, completed=True)
+        LessonProgressFactory(user=self.student, lesson=self.lesson)
         self.set_authenticate(user=self.instructor)
         response = self.delete_json_bad_request(fragment=f"{self.lesson.id}")
         assert response.status_code == 400
@@ -132,7 +132,7 @@ class LessonAPITestCase(BaseAPITestCase):
         self.set_authenticate(user=self.student)
         response = self.post_json_ok(fragment=f"{self.lesson.id}/complete")
         assert response.status_code == 200
-        assert response.data["status"] == "completed"
+        assert response.data["status"] == "Completed"
 
     def test_instructor_can_not_complete_lesson_success(self):
         """
@@ -146,7 +146,7 @@ class LessonAPITestCase(BaseAPITestCase):
         """
         Test that a student cannot complete a lesson that is already completed.
         """
-        LessonProgressFactory.create(user=self.student, lesson=self.lesson, completed=True)
+        LessonProgressFactory.create(user=self.student, lesson=self.lesson, status=DailyProcessStatus.COMPLETED.value)
         self.set_authenticate(user=self.student)
 
         response = self.post_json_bad_request(fragment=f"{self.lesson.id}/complete")

@@ -2,6 +2,8 @@
 Serializers for the Lesson model.
 """
 
+from datetime import datetime
+
 from rest_framework import serializers
 
 from core.mixins import PaginationParamSerializerMixin
@@ -59,3 +61,33 @@ class LessonParamSerializer(PaginationParamSerializerMixin):
         required=False,
         help_text="Filter by title.",
     )
+
+
+class DailyProgressCourseSerializer(BaseSerializer):
+    """
+    Serializer for daily progress in a course.
+    """
+
+    course_title = serializers.CharField()
+    completed = serializers.IntegerField()
+    in_progress = serializers.IntegerField()
+
+
+class DailyProgressParamSerializer(BaseSerializer):
+    """
+    Daily progress Parameter Serializer.
+    """
+
+    date = serializers.CharField(
+        required=False,
+        help_text="Filters the results by the specified date. e.g. 2025-11-21T17:30:30.999999Z.",
+    )
+
+    def validate_date(self, value: str):
+        """
+        Parse and validate date from string (YYYY-MM-DD).
+        """
+        try:
+            return datetime.strptime(value, "%Y-%m-%d").date()
+        except ValueError as e:
+            raise serializers.ValidationError("Invalid date format. Use YYYY-MM-DD.") from e
