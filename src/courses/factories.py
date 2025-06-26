@@ -4,7 +4,7 @@ Factories for creating course-related objects in the database.
 
 from core import factories
 from core.constants import CourseStatus
-from courses.models import Category, Course
+from courses.models import Category, Course, Enrollment
 from users.factories import UserFactory
 
 
@@ -41,3 +41,38 @@ class CourseFactory(factories.ModelFactory):
     instructor = factories.SubFactory(UserFactory)
     category = factories.SubFactory(CategoryFactory)
     status = CourseStatus.PUBLISHED.value
+
+
+class EnrollmentFactory(factories.ModelFactory):
+    """
+    Faker for Enrollment model.
+    """
+
+    class Meta:
+        """
+        Class Meta for EnrollmentFactory.
+        """
+
+        model = Enrollment
+
+    student = factories.SubFactory(UserFactory)
+    course = factories.SubFactory(CourseFactory)
+    completed = factories.Faker("boolean", chance_of_getting_true=50)
+
+
+class LessonFactory(factories.ModelFactory):
+    """
+    Faker for Lesson model.
+    """
+
+    class Meta:
+        """
+        Class Meta for LessonFactory.
+        """
+
+        model = "lessons.Lesson"
+
+    title = factories.Sequence(lambda n: f"Lesson {n}")
+    content = factories.Faker("paragraph")
+    video_url = factories.Faker("url")
+    course = factories.SubFactory(CourseFactory)
