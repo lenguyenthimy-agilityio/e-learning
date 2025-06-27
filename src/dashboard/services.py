@@ -31,11 +31,12 @@ class DashboardService:
             .order_by("-updated_at")[:5]
         )
         for p in progress:
+            course = p.lesson.course
             recent_classes.append(
                 {
-                    "title": p.lesson.title,
+                    "title": course.title,
+                    "total_minutes": course.total_duration,
                     "type": "lesson",
-                    "timestamp": p.updated_at,
                 }
             )
 
@@ -45,11 +46,11 @@ class DashboardService:
         for session in live_sessions:
             recent_classes.append(
                 {
-                    "title": session.title,
+                    "title": session.course.title,
+                    "total_minutes": course.total_duration,
                     "type": "live_session",
-                    "timestamp": session.date_time,
                 }
             )
-        recent_classes = sorted(recent_classes, key=lambda x: x["timestamp"], reverse=True)[:5]
+        recent_classes = sorted(recent_classes, key=lambda x: x["total_minutes"], reverse=True)[:5]
 
         return recent_classes

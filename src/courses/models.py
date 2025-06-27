@@ -1,5 +1,7 @@
 """Models for the courses app."""
 
+from datetime import timedelta
+
 from django.db import models
 
 from core.constants import CourseStatus
@@ -44,6 +46,17 @@ class Course(AbstractTimeStampedModel):
         String representation of the Course model.
         """
         return str(self.title)
+
+    @property
+    def total_duration(self):
+        """
+        Calculate the total duration of all lessons in the course.
+        """
+        total_minutes = 0
+        total_minutes = sum(
+            lesson.duration_minutes for lesson in self.lessons.all() if lesson.duration_minutes is not None
+        )
+        return timedelta(minutes=total_minutes)
 
 
 # --- Enrollment ---

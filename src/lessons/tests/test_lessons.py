@@ -152,3 +152,20 @@ class LessonAPITestCase(BaseAPITestCase):
         response = self.post_json_bad_request(fragment=f"{self.lesson.id}/complete")
         assert response.status_code == 400
         assert response.data["errors"]["code"] == "ERR_LESSON_ALREADY_COMPLETED"
+
+    def test_completing_last_lesson_marks_course_completed(self):
+        """
+        Test that completing the last lesson marks the course as completed.
+        """
+        self.set_authenticate(user=self.student)
+
+        lesson1 = LessonFactory(course=self.course)
+
+        # Complete first lesson manually
+        LessonProgressFactory(user=self.student, lesson=lesson1, status=DailyProcessStatus.COMPLETED.value)
+
+        # Now hit the complete API for the second
+        self.post_json_ok(fragment=f"{self.lesson.id}/complete")
+
+        self.enrollment.refresh_from_db()
+        assert self.enrollment.completed is True

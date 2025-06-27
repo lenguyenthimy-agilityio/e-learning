@@ -49,6 +49,7 @@ API_APPS = [
     "quizzes",
     "classes",
     "dashboard",
+    "certificates",
 ]
 
 INSTALLED_APPS += API_APPS

@@ -60,7 +60,7 @@ class LessonService:
         self.verify_to_complete_lesson(user, lesson)
 
         progress, _ = lesson.progress.get_or_create(
-            user=user, status=DailyProcessStatus.IN_PROGRESS.value, date=date.today()
+            user=user, status=DailyProcessStatus.COMPLETED.value, date=date.today()
         )
 
         return progress
