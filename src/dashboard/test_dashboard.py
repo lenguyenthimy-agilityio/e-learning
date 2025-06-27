@@ -106,5 +106,7 @@ class DashboardAPITestCase(BaseAPITestCase):
 
         response = self.get_json_ok(fragment="recent-classes")
         assert response.status_code == 200
+        assert len(response.data) == 2
+        assert "total_minutes" in response.data[0]
         assert any(r["type"] == "lesson" for r in response.data)
         assert any(r["type"] == "live_session" for r in response.data)

@@ -4,9 +4,11 @@ The module contains services related to course management.
 
 from rest_framework.exceptions import PermissionDenied
 
-from core.constants import CourseStatus
+from certificates.services import CertificateService
+from core.constants import CourseStatus, DailyProcessStatus
 from core.exception import CourseException, EnrollmentException
 from courses.models import Course, Enrollment
+from lessons.models import LessonProgress
 from users.models import User
 
 
@@ -45,11 +47,28 @@ class EnrollmentService:
         """
         return course.enrollments.select_related("student")
 
+    def get_enrollment_specific_course(self, course_id: int, user_id: int) -> Enrollment:
+        """
+        Returns the Enrollment object for the specified course and user.
+
+        Raises an exception if the enrollment does not exist.
+        """
+        try:
+            return Enrollment.objects.get(course_id=course_id, student_id=user_id)
+        except Enrollment.DoesNotExist as exc:
+            raise EnrollmentException(code="NOT_FOUND") from exc
+
 
 class CourseService:
     """
     Service class for handling course operations.
     """
+
+    def __init__(self):
+        """
+        Initialize the CourseService with necessary dependencies.
+        """
+        self.certificate_service = CertificateService()
 
     def get_course(self, course_id: str) -> Course:
         """
@@ -97,3 +116,24 @@ class CourseService:
         """
         if user != course.instructor and not Enrollment.objects.filter(course=course, student=user).exists():
             raise PermissionDenied("You do not have access to this lesson.")
+
+    def check_and_mark_course_completion(self, user, course):
+        """
+        Check if all lessons in the course are completed by the user and mark the course as completed.
+
+        Args:
+            user (User): Request user
+            course (Course): The course to check for completion.
+        """
+        total_lessons = course.lessons.count()
+        completed_lessons = LessonProgress.objects.filter(
+            user=user,
+            lesson__course=course,
+            status=DailyProcessStatus.COMPLETED.value,
+        ).count()
+
+        if total_lessons > 0 and total_lessons == completed_lessons:
+            updated = Enrollment.objects.filter(student=user, course=course).update(completed=True)
+
+            if updated:
+                self.certificate_service.generate_certificate(user, course)

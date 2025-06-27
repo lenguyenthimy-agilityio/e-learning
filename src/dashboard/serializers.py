@@ -48,4 +48,4 @@ class RecentClassSerializer(BaseSerializer):
 
     type = serializers.ChoiceField(choices=["lesson", "live_session"])
     title = serializers.CharField()
-    timestamp = serializers.DateTimeField(required=False)
+    total_minutes = serializers.DurationField()

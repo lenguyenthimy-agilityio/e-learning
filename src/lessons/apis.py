@@ -12,7 +12,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from core.apis import BaseAPIViewSet
-from core.constants import DailyProcessStatus
 from core.schema import base_responses, build_query_parameters
 from courses.permissions import IsEntityCourseOwner, IsStudent
 from courses.services import CourseService
@@ -120,11 +119,11 @@ class LessonViewSet(BaseAPIViewSet):
         lesson = self.get_object()
 
         progress = self.lesson_service.complete_lesson(user, lesson)
-
+        self.course_service.check_and_mark_course_completion(user, lesson.course)
         return self.response_ok(
             data={
                 "id": str(lesson.id),
-                "status": DailyProcessStatus.COMPLETED.value,
+                "status": progress.status,
                 "completed_at": progress.date.isoformat(),
             }
         )

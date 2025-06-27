@@ -73,6 +73,7 @@ class EnrollmentErrorMessage(BaseErrorMessage):
     """
 
     ALREADY_EXISTS = "Already enroll with this course."
+    NOT_FOUND = "Enrollment not found."
 
 
 class LessonErrorMessage(BaseErrorMessage):
@@ -105,6 +106,15 @@ class LiveClassMessageError(BaseErrorMessage):
     NOT_FOUND = "Live class not found."
     NOT_ENROLLED = "You are not enrolled in this live class."
     CLASS_CANCELLED = "The live class has been cancelled."
+
+
+class CertificateErrorMessage(BaseErrorMessage):
+    """
+    Certificate error message class.
+    """
+
+    NOT_FOUND = "Certificate not found."
+    COURSE_INCOMPLETE = "You must complete the course to receive a certificate."
 
 
 class BaseCustomException(Exception):
@@ -261,3 +271,15 @@ class LiveClassException(BaseCustomException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_dev_msg = "Live class operation failed."
     default_user_message = "Live class operation failed. Please try again."
+
+
+class CertificateException(BaseCustomException):
+    """
+    Certificate exception.
+    """
+
+    app_name = "CERTIFICATE"
+    error = CertificateErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_dev_msg = "Certificate operation failed."
+    default_user_message = "Certificate operation failed. Please try again."
