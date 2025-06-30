@@ -217,7 +217,7 @@ class CourseAPITestCase(BaseAPITestCase):
         self.set_authenticate(user=student)
         response = self.get_json_ok(fragment=f"{self.course.id}/lessons")
         assert response.status_code == 200
-        assert response.data["data"][0]["id"] == lesson.id
+        assert response.data["data"][0]["id"] == str(lesson.id)
 
     def test_student_can_not_get_list_lessons_for_course_not_enroll(self):
         """
