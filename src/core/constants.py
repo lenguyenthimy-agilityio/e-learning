@@ -51,4 +51,23 @@ class UserRole(BaseChoiceEnum):
     STUDENT = "Student"
 
 
+class CourseStatus(BaseChoiceEnum):
+    """
+    Status choices for the course model.
+    """
+
+    PUBLISHED = "Published"
+    UNPUBLISHED = "Unpublished"
+
+
+class DailyProcessStatus(BaseChoiceEnum):
+    """
+    Status choices for daily process.
+    """
+
+    IN_PROGRESS = "In Progress"
+    COMPLETED = "Completed"
+
+
 MAX_FILE_SIZE = 2 * 1024 * 1024  # 2 MB
+PAGINATION_LIMIT_DEFAULT = 100

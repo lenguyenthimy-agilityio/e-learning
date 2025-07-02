@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "celery[redis,sqs]>=5.5.2",
+    "coverage>=7.9.1",
     "django>=5.2",
     "django-celery-beat>=2.8.0",
     "django-debug-toolbar>=5.2.0",
@@ -16,6 +17,7 @@ dependencies = [
     "drf-spectacular>=0.28.0",
     "pillow>=11.2.1",
     "psycopg[binary]>=3.2.6",
+    "pytest-cov>=6.2.1",
     "python-decouple>=3.8",
     "requests>=2.32.3",
     "ruff>=0.11.7",

@@ -11,5 +11,6 @@ include(
     "components/common.py",
     "components/database.py",
     "components/logging.py",
+    "components/celery.py",
     *(f"environments/{environment}.py",) if environment in available_environments else (),
 )

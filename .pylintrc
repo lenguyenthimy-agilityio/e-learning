@@ -1,0 +1,14 @@
+[MASTER]
+
+ignore=migrations
+
+[FORMAT]
+max-line-length=119
+
+[MESSAGES CONTROL]
+disable=
+    fixme,
+    no-member,
+    too-few-public-methods,
+    too-many-instance-attributes,
+    too-many-arguments

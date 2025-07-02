@@ -7,7 +7,7 @@ services:
     #     environment:
     #         DJANGO_ENV: local
     #         DATABASE_HOST: db
-    #         DATABASE_NAME: e-learning
+    #         DATABASE_NAME: e-learning-v3
     #         DATABASE_USER: postgres
     #         DATABASE_PASSWORD: postgres
     #         DATABASE_ENGINE: django.db.backends.postgresql
@@ -28,7 +28,7 @@ services:
         environment:
             POSTGRES_PASSWORD: postgres
             POSTGRES_USER: postgres
-            POSTGRES_DB: e-learning
+            POSTGRES_DB: e-learning-v3
             PGDATA: /var/lib/postgresql/data/pgdata
         volumes:
             - ./data/pg/:/var/lib/postgresql/data
@@ -37,12 +37,34 @@ services:
         networks:
             - e_learning_network
 
-    redis:
-        image: "redis:alpine"
-        ports:
-            - "6379:6379"
-        networks:
-            - e_learning_network
+    # redis:
+    #     image: "redis:alpine"
+    #     ports:
+    #         - "6379:6379"
+    #     networks:
+    #         - e_learning_network
+
+    # celery-worker:
+    #     build: .
+    #     command: bin/dj-celery-worker.sh
+    #     environment:
+    #         DJANGO_ENV: local
+    #         DATABASE_HOST: db
+    #         DATABASE_NAME: e-learning-v3
+    #         DATABASE_USER: postgres
+    #         DATABASE_PASSWORD: postgres
+    #         DATABASE_ENGINE: django.db.backends.postgresql
+    #         PORT: 8000
+    #         CELERY_BROKER_URL: redis://redis:6379/0
+    #         CELERY_BROKER_TRANSPORT: redis
+
+    #     volumes:
+    #         - .:/home/app
+    #     depends_on:
+    #         - db
+    #         - redis
+    #     networks:
+    #         - e_learning_network
 
 networks:
     e_learning_network:

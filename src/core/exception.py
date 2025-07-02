@@ -14,6 +14,8 @@ class BaseErrorMessage:
     UNAUTHORIZED = "Unauthorized."
     FORBIDDEN = "Forbidden."
     NOT_FOUND = "Not found."
+    INVALID_OFFSET = "Invalid 'offset' parameter. Please provide a positive integer."
+    INVALID_LIMIT = "Invalid 'limit' parameter. Please provide a positive integer."
 
 
 class SystemErrorMessage(BaseErrorMessage):
@@ -52,6 +54,67 @@ class FileUploadErrorMessage(BaseErrorMessage):
     FILE_TOO_LARGE = "File is too large."
     UNSUPPORTED_FILE_TYPE = "Unsupported file type."
     UPLOAD_FAILED = "File upload failed."
+
+
+class CourseErrorMessage(BaseErrorMessage):
+    """
+    Course error message class.
+    """
+
+    NOT_FOUND = "Course not found."
+    ALREADY_EXISTS = "Course with this title already exists."
+    UNPUBLISHED = "Course is unpublished."
+    HAS_ENROLLMENTS = "Course has enrollments."
+
+
+class EnrollmentErrorMessage(BaseErrorMessage):
+    """
+    Enrollment error message class.
+    """
+
+    ALREADY_EXISTS = "Already enroll with this course."
+    NOT_FOUND = "Enrollment not found."
+
+
+class LessonErrorMessage(BaseErrorMessage):
+    """
+    Lesson error message class.
+    """
+
+    NOT_FOUND = "Lesson not found."
+    ALREADY_COMPLETED = "Lesson with this title already completed."
+    HAS_PROGRESS = "Lesson has progress associated with it."
+    NOT_ENROLLED = "You are not enrolled in this course to access the lesson."
+
+
+class QuizErrorMessage(BaseErrorMessage):
+    """
+    Quiz error message class.
+    """
+
+    NOT_FOUND = "Quiz not found."
+    ALREADY_COMPLETED = "Quiz already completed."
+    NOT_ENROLLED = "You are not enrolled in this course to access the quiz."
+    MISSING_ANSWER = "All questions must be answered."
+
+
+class LiveClassMessageError(BaseErrorMessage):
+    """
+    Live class error message class.
+    """
+
+    NOT_FOUND = "Live class not found."
+    NOT_ENROLLED = "You are not enrolled in this live class."
+    CLASS_CANCELLED = "The live class has been cancelled."
+
+
+class CertificateErrorMessage(BaseErrorMessage):
+    """
+    Certificate error message class.
+    """
+
+    NOT_FOUND = "Certificate not found."
+    COURSE_INCOMPLETE = "You must complete the course to receive a certificate."
 
 
 class BaseCustomException(Exception):
@@ -156,3 +219,67 @@ class FileUploadException(BaseCustomException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_dev_msg = "File upload failed."
     default_user_message = "File upload failed. Please try again."
+
+
+class CourseException(BaseCustomException):
+    """
+    Course exception.
+    """
+
+    app_name = "COURSE"
+    error = CourseErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
+class EnrollmentException(BaseCustomException):
+    """
+    Enrollment exception.
+    """
+
+    app_name = "ENROLLMENT"
+    error = EnrollmentErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
+class LessonException(BaseCustomException):
+    """
+    Lesson exception.
+    """
+
+    app_name = "LESSON"
+    error = LessonErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
+class QuizException(BaseCustomException):
+    """
+    Quiz exception.
+    """
+
+    app_name = "QUIZ"
+    error = QuizErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
+class LiveClassException(BaseCustomException):
+    """
+    Live class exception.
+    """
+
+    app_name = "LIVE_CLASS"
+    error = LiveClassMessageError
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_dev_msg = "Live class operation failed."
+    default_user_message = "Live class operation failed. Please try again."
+
+
+class CertificateException(BaseCustomException):
+    """
+    Certificate exception.
+    """
+
+    app_name = "CERTIFICATE"
+    error = CertificateErrorMessage
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_dev_msg = "Certificate operation failed."
+    default_user_message = "Certificate operation failed. Please try again."
